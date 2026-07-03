@@ -52,14 +52,7 @@
     <h2><span class="stepnum">1</span>連線 <span class="statusdot" id="dot"></span><span id="statustext" style="font-size:12px;color:var(--gray)">未連線</span></h2>
     <div class="row">
       <span>我是</span>
-      <select id="group">
-        <option value="g1">第1組 陀螺隊</option>
-        <option value="g2">第2組 彈珠隊</option>
-        <option value="g3">第3組 紙飛機隊</option>
-        <option value="g4">第4組 竹蜻蜓隊</option>
-        <option value="g5">第5組 毽子隊</option>
-        <option value="g6">第6組 尪仔標隊</option>
-      </select>
+      <select id="group"></select>
       <button class="primary" id="btnConnect">📡 連線</button>
       <button id="btnDisconnect" disabled>中斷</button>
     </div>
@@ -305,6 +298,7 @@ function tick(){
 <\/script></body></html>`;
 
 /* ── 綁定 ── */
+$('group').innerHTML = Array.from({length:15},(_,i)=>`<option value="g${i+1}">第${i+1}組</option>`).join('');
 $('btnConnect').onclick = connect;
 $('btnDisconnect').onclick = disconnect;
 $('numInputs').onchange = buildRows;
@@ -318,3 +312,4 @@ log('歡迎！選組別 → 連線 → 設規則 → 貼遊戲，四步完成。
 </script>
 </body>
 </html>
+                                                                                                                                                                                                                                                                    

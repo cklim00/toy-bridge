@@ -19,6 +19,8 @@ WEMOS 感測器訊號（MQTT）→ 網頁遊戲動作的橋接工具。選組別
 |---|---|
 | Broker | `wss://broker.emqx.io:8084/mqtt`（自有 broker 請換掉） |
 | Topic 前綴 | `ckfablab/toy2026`（訂閱 `前綴/g1~g6/signal`） |
+| 帳號 | `CKfablab` |
+| 密碼 | `@USR3413` |
 
 需與 `06_Arduino範本_WEMOS.ino` 的設定一致。注意：帳密寫在前端頁面原始碼中，僅適合活動用臨時帳號，活動後建議更換。
 
