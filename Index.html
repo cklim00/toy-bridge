@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+  *{box-sizing:border-box}html,body{margin:0}
+  :root{
+    --bg:#FFFFFF;--ink:#0A0A0A;--grey:#9A9A9A;--soft:#737375;--line:#DADADA;--line2:#EFEFEF;--panel:#FAFAF9;
+    --acc:#D94F2B;
+    --f:"Century Gothic","Microsoft JhengHei","PingFang TC",system-ui,"Noto Sans TC",sans-serif;
+    --fen:"Century Gothic","Avenir Next",system-ui,sans-serif;
+  }
+  body{background:var(--bg);color:var(--ink);font-family:var(--f);line-height:1.65;-webkit-font-smoothing:antialiased}
+
+  .top{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .top .inner{max-width:1040px;margin:0 auto;padding:16px 24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .brandbox{display:flex;flex-direction:column;gap:3px;background:var(--acc);padding:11px 17px}
+  .brand{font-weight:700;font-size:15px;letter-spacing:.02em;color:#FFFFFF}
+  .brand span{color:#FBD9CC;font-weight:400}
+  .brandsub{font-size:11.5px;color:#FCE4DA;letter-spacing:.03em}
+  .tabs{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
+  .tab{font-size:13.5px;font-weight:600;color:var(--grey);background:none;border:none;padding:4px 0;cursor:pointer;position:relative;letter-spacing:.02em;font-family:var(--f)}
+  .tab:hover{color:var(--ink)}
+  .tab.on{color:var(--ink)}
+  .tab.on::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--ink)}
+
+  .wrap{max-width:1040px;margin:0 auto;padding:42px 24px 90px}
+  .view{display:none}.view.on{display:block}
+
+  h2{font-size:24px;font-weight:800;margin:0 0 6px;letter-spacing:-.01em}
+  h2::before{content:"";display:block;width:44px;height:2px;background:var(--ink);margin-bottom:16px}
+  .sub{color:var(--soft);font-size:14px;margin:0 0 28px;max-width:64ch}
+  h3{font-size:16px;font-weight:700}
+
+  .concept{border-left:3px solid var(--ink);padding:2px 0 2px 18px;margin:0 0 26px;font-size:14px;color:var(--soft);max-width:72ch}
+  .concept b{color:var(--ink);font-weight:700}
+
+  .steps{display:flex;gap:0;flex-wrap:wrap;margin-bottom:28px;border-top:1px solid var(--line)}
+  .stp{flex:1;min-width:180px;padding:16px 22px 16px 0}
+  .stp .n{display:inline-block;font-family:var(--fen);font-size:12px;font-weight:700;color:var(--grey);letter-spacing:2px}
+  .stp .n::before{content:"0"}
+  .stp h4{margin:9px 0 3px;font-size:14px;font-weight:700}
+  .stp p{margin:0;font-size:13px;color:var(--soft)}
+
+  .card{border:1px solid var(--line);background:#fff;padding:26px;margin-bottom:14px}
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{font-size:13px;border:1px solid var(--line);background:#fff;color:var(--soft);padding:7px 15px;cursor:pointer;font-family:var(--f);transition:.12s;letter-spacing:.02em}
+  .chip:hover{border-color:var(--ink);color:var(--ink)}
+  .chip.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+
+  .btn{font-family:var(--f);font-weight:700;font-size:14px;background:var(--acc);color:#fff;border:1px solid var(--acc);padding:11px 22px;cursor:pointer;letter-spacing:.02em}
+  .btn:hover{background:#B83E20}
+  .btn.ghost{background:#fff;color:var(--ink)}
+  .btn.ghost:hover{background:var(--panel)}
+  .btn.mini{padding:6px 13px;font-size:12.5px;font-weight:600}
+  .btn:disabled{background:var(--line);border-color:var(--line);color:#fff;cursor:default}
+  .btn.acc{background:var(--acc);border-color:var(--acc)}
+
+  label{display:block;font-size:12px;color:var(--soft);margin:14px 0 6px;letter-spacing:.02em}
+  input[type=text],input[type=password],input[type=url],select,textarea{width:100%;background:#fff;border:1px solid var(--line);color:var(--ink);padding:10px 12px;font-size:14px;font-family:var(--f)}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ink)}
+  input[type=file]{width:100%;font-size:13px;color:var(--soft);background:var(--panel);border:1px solid var(--line);padding:11px}
+  textarea{min-height:90px;resize:vertical}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.row2{grid-template-columns:1fr}.tabs{gap:16px}}
+  .hint{font-size:12px;color:var(--grey)}
+
+  .promptbox{background:var(--panel);border:1px solid var(--line);padding:17px 18px;font-size:14px;line-height:1.95;color:var(--ink);white-space:pre-wrap;font-family:var(--f)}
+
+  .pintable{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+  .pintable th,.pintable td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+  .pintable th{color:var(--grey);font-weight:700;font-size:11px;letter-spacing:.08em;font-family:var(--fen)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+  .gitem{border:1px solid var(--line);background:#fff}
+  .gitem img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--panel)}
+  .gitem .cap{padding:9px 11px;font-size:12px;color:var(--soft)}
+  .gitem .cap b{color:var(--ink)}
+  .gitem a{text-decoration:none;color:inherit}
+
+  .dlrow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line2)}
+  .dlrow .nm{font-size:14px;font-weight:600}
+  .dlrow .sz{font-size:12px;color:var(--grey)}
+
+  table.tt{width:100%;border-collapse:collapse;font-size:13px}
+  .tt th,.tt td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+  .tt th{color:var(--grey);font-weight:700;font-size:11px;letter-spacing:.06em;font-family:var(--fen)}
+  .stat{font-family:var(--fen);font-weight:700}
+  .stat.zero{color:var(--line)}
+
+  .likert{display:flex;gap:6px;margin-top:4px}
+  .likert button{flex:1;padding:9px 0;border:1px solid var(--line);background:#fff;font-family:var(--f);font-size:14px;cursor:pointer}
+  .likert button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);opacity:0;background:var(--acc);color:#fff;font-weight:700;font-size:13px;padding:11px 22px;transition:.25s;pointer-events:none;z-index:50;letter-spacing:.02em}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .linkcard{display:flex;justify-content:space-between;align-items:center;gap:16px;border:1px solid var(--ink);padding:22px 26px;margin-bottom:14px}
+  .linkcard h3{margin:0 0 4px}
+  .linkcard p{margin:0;font-size:13px;color:var(--soft)}
+
+  @media(max-width:640px){
+    .top .inner{padding:12px 15px;gap:11px}
+    .brand{font-size:13px}.brandsub{font-size:10.5px}
+    .tabs{margin-left:0;width:100%;gap:18px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:3px}
+    .tabs::-webkit-scrollbar{height:0}
+    .tab{white-space:nowrap;flex:0 0 auto}
+    .wrap{padding:26px 15px 76px}
+    h2{font-size:21px}
+    .card{padding:20px}
+    .steps{border-top:none;display:block}
+    .stp{display:block;width:100%;min-width:0;padding:14px 0;border-bottom:1px solid var(--line2)}
+    .linkcard{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+  <div class="top"><div class="inner">
+    <div class="brandbox">
+      <div class="brand"><?= workshopName ?> <span>· 祖孫共玩 × AI × 實體互動</span></div>
+      <div class="brandsub">元智大學 USR 跨代智慧共創 · 藝術與設計學系 林楚卿 教授</div>
+    </div>
+    <div class="tabs">
+      <button class="tab on" data-v="draw">🎴 抽主題</button>
+      <button class="tab" data-v="learn1">教學一｜童玩遊戲</button>
+      <button class="tab" data-v="learn2">教學二｜實體感測</button>
+      <button class="tab" data-v="learn3">教學三｜合體橋接</button>
+      <button class="tab" data-v="download">下載區</button>
+      <button class="tab" data-v="submit">繳交</button>
+      <button class="tab" data-v="gallery">作品集</button>
+      <button class="tab" data-v="feedback">回饋</button>
+      <button class="tab" data-v="teacher">老師</button>
+    </div>
+  </div></div>
+
+  <div class="wrap">
+
+    <!-- ═══ 教學一：中語系（連結出去）═══ -->
+    <div class="view" id="v-learn1">
+      <h2>教學一：童玩轉譯 × 網頁遊戲</h2>
+      <p class="sub">授課教師：中語系 黃智明 助理教授。玩四個轉譯童玩，生成 AI 提示詞。</p>
+      <div class="concept"><b>核心觀念：</b>轉譯，不是模擬。我們不把尪仔標搬進網頁，而是把「拍下去的手感、翻面的期待、圍觀的喊聲」翻譯成可以操作的數位互動。</div>
+      <div class="steps">
+        <div class="stp"><span class="n">1</span><h4>玩四個童玩</h4><p>尪仔標、打陀螺、彈珠、跳房子，每人至少玩一個。</p></div>
+        <div class="stp"><span class="n">2</span><h4>填記憶與改造</h4><p>長輩口述記憶、孩子提改造想法，填進平台欄位。</p></div>
+        <div class="stp"><span class="n">3</span><h4>生成 AI 提示詞</h4><p>按「生成 AI 提示詞」複製保存，下午請 AI 做出你們的遊戲。</p></div>
+      </div>
+      <div class="linkcard">
+        <div><h3>跨代童玩共創工作台</h3><p>點右邊按鈕開啟平台（新分頁）。玩過之後記得把 AI 提示詞複製到記事本存好。</p></div>
+        <a class="btn acc" style="text-decoration:none;white-space:nowrap" href="<?= playUrl ?>" target="_blank" rel="noopener">開啟平台 →</a>
+      </div>
+    </div>
+
+    <!-- ═══ 教學二：CK 實體感測（內建）═══ -->
+    <div class="view" id="v-learn2">
+      <h2>教學二：實體感測魔法 WEMOS</h2>
+      <p class="sub">授課教師：藝設系 林楚卿 教授。拍、搖、踩、遮光，都能變成遊戲指令。</p>
+      <div class="concept"><b>只要記得一句咒語：</b><b>sendSignal('A')</b>。感測器偵測到動作，就送出 A／B／C／D 其中一個訊號；橋接控制台收到，就觸發遊戲。你不用會寫程式，要會「說清楚想要什麼」。</div>
+      <div class="steps">
+        <div class="stp"><span class="n">1</span><h4>接感測器</h4><p>照接線卡把感測器接上 WEMOS（線色：紅3V3／黑GND／黃訊號）。</p></div>
+        <div class="stp"><span class="n">2</span><h4>觸發測試</h4><p>拍一下／按一下 → 板上 LED 閃 → 控制台「訊號紀錄」跳出字母。</p></div>
+        <div class="stp"><span class="n">3</span><h4>Vibe Coding</h4><p>把範本＋咒語貼給 AI，改成你要的互動，到燒錄站上傳。</p></div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:8px">
+          <h3 style="margin:0">下載你們組的專屬 Arduino 程式</h3>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select id="inoGroup" style="width:auto"></select>
+            <button class="btn mini" onclick="genIno()">產生並下載 .ino</button>
+          </div>
+        </div>
+        <p class="hint" style="margin:0">WiFi、MQTT、組別頻道全部已填好，開機即自動連線；感測器部分是空白的——抽到主題後，把這份程式整份貼給 AI＋下面的咒語，AI 幫你寫。</p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 10px">腳位分配（六種感測器可同時接）</h3>
+        <table class="pintable">
+          <tr><th>感測器</th><th>接腳</th><th>觸發動作</th><th>適合童玩</th></tr>
+          <tr><td>大按鈕</td><td>D1＋GND</td><td>按下</td><td>發射、開始、出手</td></tr>
+          <tr><td>SW-420 震動</td><td>3V3／GND／DO→D2</td><td>拍打、搖晃</td><td>尪仔標、陀螺、毽子</td></tr>
+          <tr><td>TTP223 觸摸</td><td>3V3／GND／SIG→D5</td><td>碰到（隔紙可）</td><td>跳房子踏墊</td></tr>
+          <tr><td>SW-520D 傾斜</td><td>D6＋GND</td><td>翻倒、甩動</td><td>跳繩、陀螺倒下</td></tr>
+          <tr><td>磁簧＋磁鐵</td><td>D7＋GND</td><td>磁鐵靠近</td><td>彈弓拉放、機關</td></tr>
+          <tr><td>光敏（類比）</td><td>3V3／GND／AO→A0</td><td>變暗、遮光</td><td>彈珠通過、離座</td></tr>
+        </table>
+        <p class="hint" style="margin-top:10px">詳細接線圖請到「下載區」抓〈零件介紹與接線圖〉。</p>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 10px">給 AI 的咒語模板（Vibe Coding）</h3>
+        <div class="promptbox" id="spellbox">上面是我的 Arduino 範本，規則：
+1. 只能修改「✏️ 學員創作區」的 mySetup() 和 myLoop()，鎖定區一個字都不能動。
+2. 送訊號只能用 sendSignal('A') 到 sendSignal('D')。
+3. 板子是 WEMOS D1 mini，感測器接腳是固定的，照這張表寫程式：
+   大按鈕→D1（接GND，INPUT_PULLUP）
+   震動 SW-420→D2（數位）
+   觸摸 TTP223→D5（數位）
+   傾斜 SW-520D→D6（接GND，INPUT_PULLUP）
+   磁簧開關→D7（接GND，INPUT_PULLUP）
+   光敏→A0（類比，讀值 0~1023，變暗數值變小）
+
+我用的感測器有：（寫這裡，例：震動開關＋大按鈕）
+
+我想做的互動是：（寫這裡，例：
+陀螺轉動時震動開關會一直晃，每晃一下送訊號 A；
+按下大按鈕就送訊號 B）
+
+請給我完整可以直接上傳的程式碼，並用小學生聽得懂的話解釋你改了哪裡。</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap">
+          <span class="hint">先到「下載區」抓 Arduino 範本 → 整份貼給 AI → 再貼這段咒語</span>
+          <button class="btn" onclick="copyText('spellbox','咒語已複製')">複製咒語</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 10px">卡住了？</h3>
+        <table class="pintable">
+          <tr><th>狀況</th><th>解法</th></tr>
+          <tr><td>LED 有閃但遊戲沒反應</td><td>看控制台「訊號紀錄」；沒收到→檢查控制台組別是否選對</td></tr>
+          <tr><td>訊號狂送不停</td><td>跟 AI 說「加上冷卻時間，同一訊號 1 秒最多送 1 次」</td></tr>
+          <tr><td>AI 改壞了</td><td>把原始範本重貼給 AI：「回到這個版本，重新只改學員創作區」</td></tr>
+          <tr><td>都不行</td><td>舉手，燒錄站助教會過去</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ 教學三：合體橋接 ═══ -->
+    <div class="view" id="v-learn3">
+      <h2>教學三：合體！實體 × 網頁</h2>
+      <p class="sub">授課教師：藝設系 林楚卿 教授。把你的感測器接上你的遊戲——無線的。</p>
+      <div class="concept"><b>原理一句話：</b>感測器動作 → WEMOS 無線送出訊號（A／B／C／D）→ 橋接控制台收到 → 依你設的規則觸發遊戲（模擬按鍵、點按鈕、呼叫函式）。</div>
+      <div class="steps">
+        <div class="stp"><span class="n">1</span><h4>選組別連線</h4><p>開控制台 → 選你的組（第1～15組）→ 按連線 → 綠燈亮。</p></div>
+        <div class="stp"><span class="n">2</span><h4>設定規則</h4><p>選訊號數量，設「當 A 有訊號 → 就⋯」。還沒接硬體可先按橘色測試鈕試規則。</p></div>
+        <div class="stp"><span class="n">3</span><h4>貼上遊戲</h4><p>把你們的 HTML 遊戲整段貼進右邊 → 載入遊戲 → 觸發感測器！</p></div>
+      </div>
+      <div class="linkcard">
+        <div><h3>實體橋接控制台</h3><p>點右邊按鈕開啟（新分頁）。建議用小組的電腦或平板開，全程掛著。</p></div>
+        <a class="btn acc" style="text-decoration:none;white-space:nowrap" href="<?= bridgeUrl ?>" target="_blank" rel="noopener">開啟控制台 →</a>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px">免改碼捷徑（先體驗合體）</h3>
+        <p style="margin:0 0 10px;font-size:13.5px;color:var(--soft)">教學一平台的遊戲不用改任何程式，就能被實體訊號控制——規則選「呼叫遊戲裡的函式」：</p>
+        <table class="pintable">
+          <tr><th>遊戲</th><th>函式名</th><th>效果</th></tr>
+          <tr><td>打陀螺</td><td>tapTop</td><td>替旋軌補能（等於點擊畫面）</td></tr>
+          <tr><td>跳房子</td><td>tapHop</td><td>節奏點擊前進一格</td></tr>
+        </table>
+        <p class="hint" style="margin-top:10px">自己做的遊戲：用鍵盤控制的選「模擬按下鍵盤」；有按鈕的選「點擊網頁上的按鈕」填按鈕文字或 #id。</p>
+      </div>
+    </div>
+
+    <!-- ═══ 抽主題 ═══ -->
+    <div class="view on" id="v-draw">
+      <h2>抽出你們家的童玩主題</h2>
+      <p class="sub">選你們的組別 → 按抽牌。抽到什麼，今天就一起復活什麼！每組只能抽一次、先抽先贏不重複。</p>
+      <div class="card" style="text-align:center;padding:36px 26px">
+        <div style="margin-bottom:22px">
+          <select id="drawGroup" style="width:auto;min-width:220px;font-size:16px;padding:10px 14px"></select>
+        </div>
+        <div id="drawCard" style="width:230px;height:310px;margin:0 auto 22px;border:2px solid var(--ink);background:var(--ink);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;transition:transform .15s">
+          <div style="font-size:44px" id="drawIcon">🎴</div>
+          <div style="font-size:26px;font-weight:800;letter-spacing:.05em;padding:0 14px;line-height:1.4" id="drawText">？？？</div>
+          <div style="font-size:12px;color:#C9C9C9" id="drawSub">命運的童玩</div>
+        </div>
+        <button class="btn acc" id="drawBtn" style="font-size:17px;padding:13px 40px" onclick="doDraw()">🎴 抽牌！</button>
+        <p class="hint" style="margin-top:14px" id="drawHint">抽到的主題會自動登記，繳交和回饋的組別選單都會顯示</p>
+      </div>
+      <div class="card">
+        <h3 style="margin:0 0 10px">各組抽牌狀況</h3>
+        <div class="chips" id="drawStatus"></div>
+      </div>
+    </div>
+
+    <!-- ═══ 下載區 ═══ -->
+    <div class="view" id="v-download">
+      <h2>下載區</h2>
+      <p class="sub">驅動程式、Arduino 範本、程式庫、零件說明，都在這裡。</p>
+      <div class="card">
+        <div id="dlList"><p class="hint">載入中…</p></div>
+      </div>
+      <div class="concept"><b>常見需求：</b>電腦第一次接 WEMOS 要先裝 <b>CH340 驅動</b>；Arduino IDE 要安裝 <b>PubSubClient</b> 程式庫（下載區有 zip，IDE→草稿碼→匯入程式庫→加入 .ZIP）。</div>
+    </div>
+
+    <!-- ═══ 繳交 ═══ -->
+    <div class="view" id="v-submit">
+      <h2>繳交區</h2>
+      <p class="sub">選你要交的模組，每個模組分開繳交。重複繳交會覆蓋舊檔（只留最新版）。</p>
+      <div class="chips" id="modChips" style="margin-bottom:18px"></div>
+      <div class="card">
+        <div class="row2">
+          <div><label>組別</label><select id="subGroup"></select></div>
+          <div><label>姓名（誰來交件）</label><input type="text" id="subName" placeholder="例：小明"></div>
+        </div>
+        <div id="slotArea"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;gap:10px;flex-wrap:wrap">
+          <span class="hint" id="subHint">單檔上限約 20 MB；影片請改貼連結</span>
+          <button class="btn acc" id="subBtn" onclick="doSubmit()">送出繳交</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 作品集 ═══ -->
+    <div class="view" id="v-gallery">
+      <h2>作品集</h2>
+      <p class="sub">各模組的作品牆，交上來就看得到。</p>
+      <div class="chips" id="galChips" style="margin-bottom:18px"></div>
+      <div class="grid" id="galGrid"><p class="hint">選一個牆面</p></div>
+    </div>
+
+    <!-- ═══ 回饋 ═══ -->
+    <div class="view" id="v-feedback">
+      <h2>課程回饋</h2>
+      <p class="sub">匿名問卷，1 分鐘完成。你的想法會讓下一場工作坊更好。</p>
+      <div class="card">
+        <div class="row2">
+          <div><label>組別</label><select id="fbGroup"></select></div>
+          <div><label>身分</label><select id="fbRole">
+            <option value="">請選擇</option><option>小學生</option><option>家長／長輩</option><option>其他</option>
+          </select></div>
+        </div>
+        <div id="fbQs"></div>
+        <label>今天最喜歡的部分？</label>
+        <input type="text" id="fbFav" placeholder="例：陀螺被我的按鈕救活的那一刻">
+        <label>意見與建議</label>
+        <textarea id="fbComment" placeholder="想說什麼都可以"></textarea>
+        <div style="text-align:right;margin-top:16px">
+          <button class="btn acc" id="fbBtn" onclick="doFeedback()">送出回饋</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 老師 ═══ -->
+    <div class="view" id="v-teacher">
+      <h2>老師／助教</h2>
+      <p class="sub">檢查各組繳交狀況；下載 gcode 送列印、雷切檔送雷切。</p>
+      <div class="card" id="tLogin">
+        <label>密碼</label>
+        <div style="display:flex;gap:10px">
+          <input type="password" id="tPass" style="flex:1" onkeydown="if(event.key==='Enter')tLogin()">
+          <button class="btn" onclick="tLogin()">進入</button>
+        </div>
+      </div>
+      <div id="tPanel" style="display:none">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+            <h3 style="margin:0">各組題目設定</h3>
+            <button class="btn mini" onclick="saveTopics()">儲存全部題目</button>
+          </div>
+          <p class="hint" style="margin:0 0 10px">分組定案後在這裡填各組題目，學員的組別選單會即時顯示「第N組｜題目」。</p>
+          <div class="row2" id="tTopics"></div>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 12px">各組繳交狀況（件數）</h3>
+          <div style="overflow-x:auto"><table class="tt" id="tStatus"></table></div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px">
+            <h3 style="margin:0">繳交明細（最新在前）</h3>
+            <div class="chips" id="tFilter"></div>
+          </div>
+          <div style="overflow-x:auto"><table class="tt" id="tTable"></table></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+const GROUPS  = JSON.parse('<?!= groupsJson ?>');
+const MODULES = JSON.parse('<?!= modulesJson ?>');
+const INO_CFG = JSON.parse('<?!= inoCfgJson ?>');
+const TOPIC_POOL = JSON.parse('<?!= topicPoolJson ?>');
+const $ = id => document.getElementById(id);
+
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function copyText(id, msg){
+  navigator.clipboard.writeText($(id).textContent).then(()=>toast(msg||'已複製'));
+}
+
+/* ── 分頁切換 ── */
+document.querySelectorAll('.tab').forEach(b=>{
+  b.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===b));
+    document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on', v.id==='v-'+b.dataset.v));
+    if(b.dataset.v==='download' && !dlLoaded) loadDownloads();
+  };
+});
+
+/* ── 下載區 ── */
+let dlLoaded = false;
+function loadDownloads(){
+  dlLoaded = true;
+  google.script.run.withSuccessHandler(list=>{
+    if(!list.length){ $('dlList').innerHTML = '<p class="hint">老師還沒放檔案，等等再來看。</p>'; return; }
+    $('dlList').innerHTML = list.map(f=>`
+      <div class="dlrow">
+        <div><div class="nm">${esc(f.name)}</div><div class="sz">${f.size}</div></div>
+        <a class="btn mini ghost" style="text-decoration:none" href="${f.url}" target="_blank" rel="noopener">下載</a>
+      </div>`).join('');
+  }).listResources();
+}
+
+/* ── 繳交 ── */
+let curMod = 'm1';
+function buildSubmit(){
+  const sel = $('subGroup');
+  sel.innerHTML = '<option value="">請選擇組別</option>' + GROUPS.map(g=>`<option value="${esc(g.name)}">${esc(g.label)}</option>`).join('');
+  const chips = $('modChips');
+  chips.innerHTML = Object.entries(MODULES).map(([k,m])=>
+    `<button class="chip ${k===curMod?'on':''}" data-m="${k}">${m.name}</button>`).join('');
+  chips.querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{ curMod = c.dataset.m;
+      chips.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x===c));
+      buildSlots(); };
+  });
+  buildSlots();
+}
+function buildSlots(){
+  const m = MODULES[curMod];
+  $('slotArea').innerHTML = m.slots.map(s=>{
+    if(s.accept === 'link')
+      return `<label>${esc(s.label)}</label><input type="url" id="slot_${s.key}" placeholder="https://…">`;
+    return `<label>${esc(s.label)}</label><input type="file" id="slot_${s.key}" accept="${s.accept}">`;
+  }).join('');
+}
+function fileToB64(input){
+  return new Promise((res)=>{
+    const f = input.files && input.files[0];
+    if(!f) return res(null);
+    if(f.size > 20*1024*1024){ toast('「'+f.name+'」超過 20MB，請縮小或改貼連結'); return res('TOOBIG'); }
+    const r = new FileReader();
+    r.onload = ()=>res({ name:f.name, mime:f.type||'application/octet-stream', data:r.result.split(',')[1] });
+    r.readAsDataURL(f);
+  });
+}
+async function doSubmit(){
+  const group = $('subGroup').value, name = $('subName').value.trim();
+  if(!group) return toast('請先選組別');
+  if(!name)  return toast('請填姓名');
+  const m = MODULES[curMod];
+  const files = [], links = [];
+  for(const s of m.slots){
+    const el = $('slot_'+s.key);
+    if(s.accept === 'link'){
+      if(el.value.trim()) links.push({ slot:s.key, url:el.value.trim() });
+    }else{
+      const f = await fileToB64(el);
+      if(f === 'TOOBIG') return;
+      if(f) files.push({ slot:s.key, name:f.name, mime:f.mime, data:f.data });
+    }
+  }
+  if(!files.length && !links.length) return toast('請至少選一個檔案');
+  $('subBtn').disabled = true; $('subBtn').textContent = '上傳中…';
+  google.script.run.withSuccessHandler(res=>{
+    $('subBtn').disabled = false; $('subBtn').textContent = '送出繳交';
+    toast(res.message);
+    if(res.ok) m.slots.forEach(s=>{ const el=$('slot_'+s.key); if(el) el.value=''; });
+  }).withFailureHandler(()=>{
+    $('subBtn').disabled = false; $('subBtn').textContent = '送出繳交';
+    toast('上傳失敗，請再試一次');
+  }).submitModule({ group, studentName:name, module:curMod, files, links });
+}
+
+/* ── 作品集 ── */
+const WALLS = [
+  { key:'m1',    slot:'game_shot',  label:'遊戲牆' },
+  { key:'m2',    slot:'device_pic', label:'實體裝置牆' },
+  { key:'m3',    slot:'demo_pic',   label:'合體 Demo 牆' },
+  { key:'final', slot:'scene_pic',  label:'情境圖牆' },
+  { key:'final', slot:'board_pic',  label:'展示版面牆' },
+];
+function buildGallery(){
+  const chips = $('galChips');
+  chips.innerHTML = WALLS.map((w,i)=>`<button class="chip" data-i="${i}">${w.label}</button>`).join('');
+  chips.querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{
+      chips.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on', x===c));
+      const w = WALLS[+c.dataset.i];
+      $('galGrid').innerHTML = '<p class="hint">載入中…</p>';
+      google.script.run.withSuccessHandler(items=>{
+        if(!items.length){ $('galGrid').innerHTML = '<p class="hint">還沒有作品，快去繳交！</p>'; return; }
+        $('galGrid').innerHTML = items.map(it=>`
+          <div class="gitem"><a href="${it.link}" target="_blank" rel="noopener">
+            <img src="${it.thumb}" loading="lazy" alt="">
+            <div class="cap"><b>${esc(it.group)}</b><br>${esc(it.name)}</div>
+          </a></div>`).join('');
+      }).getGallery(w.key, w.slot);
+    };
+  });
+}
+
+/* ── 回饋 ── */
+const FBQ = [
+  ['q1','今天整體好玩嗎？'], ['q2','跟長輩／孩子一起做，感覺如何？'],
+  ['q3','技術（遊戲／感測器）好上手嗎？'], ['q4','有學到新東西嗎？'], ['q5','會推薦朋友來嗎？'],
+];
+const fbAns = {};
+function buildFeedback(){
+  $('fbGroup').innerHTML = '<option value="">請選擇組別</option>' + GROUPS.map(g=>`<option value="${esc(g.name)}">${esc(g.label)}</option>`).join('');
+  $('fbQs').innerHTML = FBQ.map(([k,q])=>`
+    <label>${q}（1 不同意 ～ 5 非常同意）</label>
+    <div class="likert" id="lk_${k}">${[1,2,3,4,5].map(n=>`<button data-k="${k}" data-n="${n}">${n}</button>`).join('')}</div>
+  `).join('');
+  document.querySelectorAll('.likert button').forEach(b=>{
+    b.onclick = ()=>{
+      fbAns[b.dataset.k] = +b.dataset.n;
+      document.querySelectorAll(`#lk_${b.dataset.k} button`).forEach(x=>x.classList.toggle('on', x===b));
+    };
+  });
+}
+function doFeedback(){
+  const payload = {
+    group: $('fbGroup').value, role: $('fbRole').value,
+    q1: fbAns.q1, q2: fbAns.q2, q3: fbAns.q3, q4: fbAns.q4, q5: fbAns.q5,
+    fav: $('fbFav').value, comment: $('fbComment').value
+  };
+  $('fbBtn').disabled = true;
+  google.script.run.withSuccessHandler(res=>{
+    $('fbBtn').disabled = false;
+    toast(res.message);
+  }).submitFeedback(payload);
+}
+
+/* ── 老師 ── */
+let tData = null, tPassVal = '', tCurFilter = 'all';
+function tLogin(){
+  tPassVal = $('tPass').value;
+  google.script.run.withSuccessHandler(res=>{
+    if(!res.ok) return toast(res.message);
+    tData = res;
+    $('tLogin').style.display = 'none';
+    $('tPanel').style.display = 'block';
+    renderTopics(); renderStatus(); renderFilter(); renderTable();
+  }).teacherList(tPassVal);
+}
+function renderTopics(){
+  $('tTopics').innerHTML = tData.groupsData.map((g,i)=>`
+    <div style="display:flex;gap:8px;align-items:center">
+      <span style="font-size:13px;font-weight:700;white-space:nowrap;min-width:52px">${esc(g.name)}</span>
+      <input type="text" id="topic_${i}" value="${esc(g.topic)}" placeholder="題目（例：光影陀螺）">
+    </div>`).join('');
+}
+function saveTopics(){
+  const topics = tData.groupsData.map((g,i)=>({ name:g.name, topic:$('topic_'+i).value.trim() }));
+  toast('儲存中…');
+  google.script.run.withSuccessHandler(res=>{
+    toast(res.message);
+    if(res.ok && res.groups){
+      tData.groupsData = res.groups;
+      GROUPS.length = 0; res.groups.forEach(g=>GROUPS.push(g));
+      buildSubmit(); buildFeedback(); buildDraw(); // 學員下拉與抽牌狀況即時更新
+    }
+  }).saveGroupTopics(tPassVal, topics);
+}
+function renderStatus(){
+  const mods = Object.keys(tData.moduleNames);
+  let html = '<tr><th>組別</th>' + mods.map(m=>`<th>${tData.moduleNames[m].split('｜')[0]}</th>`).join('') + '</tr>';
+  tData.groups.forEach(g=>{
+    html += `<tr><td><b>${esc(g)}</b></td>` + mods.map(m=>{
+      const n = (tData.status[g]||{})[m] || 0;
+      return `<td class="stat ${n?'':'zero'}">${n||'—'}</td>`;
+    }).join('') + '</tr>';
+  });
+  $('tStatus').innerHTML = html;
+}
+function renderFilter(){
+  const mods = ['all', ...Object.keys(tData.moduleNames)];
+  $('tFilter').innerHTML = mods.map(m=>
+    `<button class="chip ${m===tCurFilter?'on':''}" data-m="${m}">${m==='all'?'全部':tData.moduleNames[m].split('｜')[0]}</button>`).join('');
+  $('tFilter').querySelectorAll('.chip').forEach(c=>{
+    c.onclick = ()=>{ tCurFilter = c.dataset.m; renderFilter(); renderTable(); };
+  });
+}
+function renderTable(){
+  const rows = tData.list.filter(r=> tCurFilter==='all' || r.module===tCurFilter);
+  let html = '<tr><th>時間</th><th>組別</th><th>姓名</th><th>模組</th><th>檔案</th><th></th></tr>';
+  rows.forEach((r,i)=>{
+    const action = r.isLink
+      ? `<a class="btn mini ghost" style="text-decoration:none" href="${esc(r.fname)}" target="_blank" rel="noopener">開連結</a>`
+      : `<button class="btn mini" onclick="tDl('${r.fileId}')">下載</button>
+         <a class="btn mini ghost" style="text-decoration:none" href="${esc(r.folder)}" target="_blank" rel="noopener">資料夾</a>`;
+    html += `<tr><td>${r.time}</td><td>${esc(r.group)}</td><td>${esc(r.name)}</td>
+      <td>${esc((tData.moduleNames[r.module]||r.module).split('｜')[0])}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.fname)}</td>
+      <td style="white-space:nowrap">${action}</td></tr>`;
+  });
+  $('tTable').innerHTML = html || '<tr><td class="hint">沒有資料</td></tr>';
+}
+function tDl(fileId){
+  toast('下載中…');
+  google.script.run.withSuccessHandler(res=>{
+    if(!res.ok) return toast(res.message);
+    const a = document.createElement('a');
+    a.href = 'data:' + res.mime + ';base64,' + res.data;
+    a.download = res.name;
+    a.click();
+    toast('已下載：' + res.name);
+  }).teacherDownload(tPassVal, fileId);
+}
+
+/* ── 抽主題（lottery）── */
+const TOPIC_HINTS = {
+  '尪仔標':'建議感測器：震動（拍擊）',
+  '打陀螺':'建議感測器：震動＋傾斜（倒下）',
+  '彈珠':'建議感測器：光敏（滾過）或震動（碰撞）',
+  '跳房子':'建議感測器：觸摸踏墊（鋁箔延伸）',
+  '踢毽子':'建議感測器：震動（踢中）',
+  '竹蜻蜓':'建議感測器：按鈕（發射）或光敏（離座）',
+  '丟沙包':'建議感測器：震動（命中標靶）',
+  '紙相撲':'建議感測器：震動（拍桌前進）',
+  '一二三木頭人':'建議感測器：震動／傾斜（動了就被抓）',
+  '橡皮筋彈弓':'建議感測器：磁簧＋磁鐵（拉放）',
+  '紙飛機':'建議感測器：光敏（穿圈）或震動（中靶）',
+  '跳繩':'建議感測器：傾斜（甩動）或踩踏墊',
+};
+let drawing = false;
+function buildDraw(){
+  $('drawGroup').innerHTML = '<option value="">選你們的組別</option>' +
+    GROUPS.map(g=>`<option value="${esc(g.name)}" ${g.topic?'disabled':''}>${esc(g.label)}${g.topic?'（已抽）':''}</option>`).join('');
+  $('drawStatus').innerHTML = GROUPS.map(g=>
+    `<span class="chip ${g.topic?'on':''}" style="cursor:default">${esc(g.name)}${g.topic?'｜'+esc(g.topic):''}</span>`).join('');
+}
+function doDraw(){
+  if(drawing) return;
+  const group = $('drawGroup').value;
+  if(!group) return toast('先選你們的組別');
+  drawing = true;
+  $('drawBtn').disabled = true;
+  $('drawSub').textContent = '洗牌中…';
+  // 轉輪動畫：快速輪播卡池名稱
+  let ticks = 0;
+  const spin = setInterval(()=>{
+    $('drawText').textContent = TOPIC_POOL[Math.floor(Math.random()*TOPIC_POOL.length)];
+    $('drawIcon').textContent = ['🎴','🀄','🎲','✨'][ticks++ % 4];
+  }, 90);
+  // 保險絲：12 秒沒回應就停止，避免卡死
+  const fuse = setTimeout(()=>{
+    clearInterval(spin); drawing = false; $('drawBtn').disabled = false;
+    $('drawIcon').textContent = '😅'; $('drawText').textContent = '？？？';
+    $('drawSub').textContent = '沒有回應——請確認 Code.gs 也更新並部署了新版本';
+  }, 12000);
+  let run;
+  try { run = google.script.run; }
+  catch(e){ clearTimeout(fuse); clearInterval(spin); drawing=false; $('drawBtn').disabled=false; return toast('系統初始化失敗，請重新整理'); }
+  if (typeof run.drawTopic !== 'function'){
+    clearTimeout(fuse); clearInterval(spin); drawing = false; $('drawBtn').disabled = false;
+    $('drawSub').textContent = '後端缺少 drawTopic——Code.gs 尚未更新部署';
+    return toast('請先更新 Code.gs 並部署新版本');
+  }
+  run.withSuccessHandler(res=>{
+    clearTimeout(fuse);
+    // 至少轉 1.5 秒再開牌，儀式感
+    setTimeout(()=>{
+      clearInterval(spin);
+      drawing = false;
+      $('drawBtn').disabled = false;
+      if(res.ok){
+        $('drawIcon').textContent = '🎉';
+        $('drawText').textContent = res.topic;
+        $('drawSub').textContent = TOPIC_HINTS[res.topic] || (group + '，就是它了！');
+        $('drawCard').style.background = 'var(--acc)';
+        $('drawCard').style.borderColor = 'var(--acc)';
+        toast('抽到「' + res.topic + '」，已自動登記！');
+      }else{
+        $('drawIcon').textContent = res.topic ? '🎴' : '😅';
+        $('drawText').textContent = res.topic || '？？？';
+        $('drawSub').textContent = res.message;
+        toast(res.message);
+      }
+      if(res.groups){
+        GROUPS.length = 0; res.groups.forEach(g=>GROUPS.push(g));
+        buildDraw(); buildSubmit(); buildFeedback();
+      }
+    }, 1500);
+  }).withFailureHandler(err=>{
+    clearTimeout(fuse);
+    clearInterval(spin); drawing = false; $('drawBtn').disabled = false;
+    $('drawIcon').textContent = '😅'; $('drawText').textContent = '？？？';
+    $('drawSub').textContent = '連線失敗：' + (err && err.message ? err.message : '再按一次');
+  }).drawTopic(group);
+}
+
+/* ── Arduino 程式產生器（零 AI，純字串替換）── */
+const INO_TEMPLATE = [
+'/**********************************************************************',
+' *  跨代童玩黑客松｜WEMOS D1 mini 實體訊號程式（{{GLABEL}} 專屬版）',
+' *  由 Dashboard 自動產生：WiFi／MQTT／頻道都已填好，直接燒錄即可。',
+' *  ★ 你只能改「✏️ 學員創作區」；送訊號用 sendSignal(\'A\') ~ \'D\'',
+' *  ★ 🔒 鎖定區一個字都不准動',
+' *  需要程式庫：PubSubClient（下載區有）｜板子選 LOLIN(WEMOS) D1 R2 & mini',
+' **********************************************************************/',
+'',
+'/* ════════════ 🔒 鎖定區（禁改）════════════ */',
+'#include <ESP8266WiFi.h>',
+'#include <WiFiClientSecure.h>',
+'#include <PubSubClient.h>',
+'',
+'const char* WIFI_SSID   = "{{SSID}}";',
+'const char* WIFI_PASS   = "{{WPASS}}";',
+'const char* MQTT_BROKER = "{{BROKER}}";',
+'const int   MQTT_PORT   = 8883;   // TLS 埠（1883 常被行動網路過濾）',
+'const char* MQTT_USER   = "{{MUSER}}";',
+'const char* MQTT_PASS   = "{{MPASS}}";',
+'const char* TOPIC_PREFIX= "{{PREFIX}}";',
+'const char* GROUP       = "{{GROUP}}";   // {{GLABEL}}',
+'',
+'WiFiClientSecure espClient;   // TLS',
+'PubSubClient  mqtt(espClient);',
+'char          topicBuf[64];',
+'unsigned long lastSend[4] = {0,0,0,0};',
+'const unsigned long COOLDOWN = 200;',
+'',
+'void sendSignal(char sig) {',
+'  int idx = sig - \'A\';',
+'  if (idx < 0 || idx > 3) return;',
+'  unsigned long now = millis();',
+'  if (now - lastSend[idx] < COOLDOWN) return;',
+'  lastSend[idx] = now;',
+'  char msg[2] = {sig, \'\\0\'};',
+'  mqtt.publish(topicBuf, msg);',
+'  digitalWrite(LED_BUILTIN, LOW); delay(20); digitalWrite(LED_BUILTIN, HIGH);',
+'  Serial.print("送出訊號: "); Serial.println(sig);',
+'}',
+'',
+'void connectAll() {',
+'  WiFi.mode(WIFI_STA);',
+'  WiFi.begin(WIFI_SSID, WIFI_PASS);',
+'  Serial.print("連 WiFi 中");',
+'  while (WiFi.status() != WL_CONNECTED) { delay(400); Serial.print("."); }',
+'  Serial.println(" OK");',
+'  snprintf(topicBuf, sizeof(topicBuf), "%s/%s/signal", TOPIC_PREFIX, GROUP);',
+'  espClient.setBufferSizes(1024, 1024);  // 縮小 TLS 緩衝（ESP8266 必加）',
+'  espClient.setInsecure();               // TLS 不驗證憑證（活動用）',
+'  mqtt.setServer(MQTT_BROKER, MQTT_PORT);',
+'  while (!mqtt.connected()) {',
+'    char cid[32];',
+'    snprintf(cid, sizeof(cid), "wemos_%s_%04X", GROUP, (unsigned)random(0xFFFF));',
+'    Serial.print("連 MQTT 中...");',
+'    if (mqtt.connect(cid, MQTT_USER, MQTT_PASS)) Serial.println(" OK");',
+'    else { Serial.println(" 重試"); delay(1000); }',
+'  }',
+'}',
+'',
+'void setup() {',
+'  Serial.begin(115200);',
+'  pinMode(LED_BUILTIN, OUTPUT);',
+'  digitalWrite(LED_BUILTIN, HIGH);',
+'  randomSeed(analogRead(A0));',
+'  connectAll();',
+'  mySetup();',
+'}',
+'',
+'void loop() {',
+'  if (WiFi.status() != WL_CONNECTED || !mqtt.connected()) connectAll();',
+'  mqtt.loop();',
+'  myLoop();',
+'}',
+'/* ════════════════ 🔒 鎖定區結束 ════════════════ */',
+'',
+'/* ════════════ ✏️ 學員創作區（只能改這裡！）════════════',
+' *  這裡現在是空的——抽到主題、選好感測器之後，',
+' *  把「這整份程式」＋教學二的咒語一起貼給 AI，',
+' *  AI 會幫你把感測器程式寫進下面兩個函式。',
+' *',
+' *  感測器接腳（固定）：按鈕→D1、震動→D2、觸摸→D5、',
+' *  傾斜→D6、磁簧→D7、光敏→A0（類比 0~1023）',
+' *  送訊號指令：sendSignal(\'A\') ~ sendSignal(\'D\')',
+' * ═══════════════════════════════════════════════════ */',
+'',
+'void mySetup() {',
+'  // AI 會把感測器的初始化寫在這裡（例：pinMode）',
+'}',
+'',
+'void myLoop() {',
+'  // AI 會把「偵測動作 → sendSignal」的邏輯寫在這裡',
+'',
+'  delay(5);',
+'}',
+''].join('\n');
+
+function buildInoSelect(){
+  $('inoGroup').innerHTML = GROUPS.map((g,i)=>`<option value="${i+1}">${esc(g.label)}</option>`).join('');
+}
+function genIno(){
+  const n = +$('inoGroup').value;
+  const g = GROUPS[n-1] || { label: '第'+n+'組' };
+  const ino = INO_TEMPLATE
+    .replace(/\{\{SSID\}\}/g,  INO_CFG.ssid)
+    .replace(/\{\{WPASS\}\}/g, INO_CFG.wpass)
+    .replace(/\{\{BROKER\}\}/g,INO_CFG.broker)
+    .replace(/\{\{MUSER\}\}/g, INO_CFG.muser)
+    .replace(/\{\{MPASS\}\}/g, INO_CFG.mpass)
+    .replace(/\{\{PREFIX\}\}/g,INO_CFG.prefix)
+    .replace(/\{\{GROUP\}\}/g, 'g'+n)
+    .replace(/\{\{GLABEL\}\}/g, g.label);
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(ino);
+  a.download = 'wemos_g' + n + '.ino';
+  a.click();
+  toast('已下載 wemos_g' + n + '.ino');
+}
+
+/* ── 工具 ── */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+buildSubmit();
+buildGallery();
+buildFeedback();
+buildInoSelect();
+buildDraw();
+</script>
+</body>
+</html>
