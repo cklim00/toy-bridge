@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>跨代童玩｜實體訊號橋接控制台（無線版）</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.5/mqtt.min.js"></script>
+<style>
+  :root{
+    --cream:#F4ECDD; --orange:#D94F2B; --black:#1A1A1A; --gray:#6B6257;
+    --ok:#3E8E5A; --card:#FFFFFF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Microsoft JhengHei","PingFang TC",sans-serif; background:var(--cream); color:var(--black); padding:16px;}
+  h1{font-size:22px; margin-bottom:2px;}
+  .sub{color:var(--gray); font-size:13px; margin-bottom:14px;}
+  .wrap{display:grid; grid-template-columns:380px 1fr; gap:14px; align-items:start;}
+  .card{background:var(--card); border-radius:12px; padding:14px; box-shadow:0 2px 8px rgba(0,0,0,.12); margin-bottom:14px;}
+  .card h2{font-size:15px; margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .stepnum{background:var(--orange); color:#fff; width:24px; height:24px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;}
+  button{font-family:inherit; font-size:14px; border:none; border-radius:8px; padding:8px 14px; cursor:pointer; background:var(--black); color:#fff;}
+  button:hover{opacity:.85;}
+  button.primary{background:var(--orange);}
+  button.small{font-size:12px; padding:5px 10px;}
+  button:disabled{background:#bbb; cursor:not-allowed;}
+  select,input[type=text]{font-family:inherit; font-size:13px; padding:6px 8px; border:1.5px solid #ccc; border-radius:6px; background:#fff;}
+  textarea{width:100%; font-family:Consolas,monospace; font-size:12px; border:1.5px solid #ccc; border-radius:8px; padding:8px; resize:vertical;}
+  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;}
+  .statusdot{width:12px; height:12px; border-radius:50%; background:#c33; display:inline-block;}
+  .statusdot.on{background:var(--ok);}
+  .rule{background:#FAF6EC; border-radius:8px; padding:10px; margin-bottom:8px;}
+  .rule .sig{font-weight:bold; color:var(--orange); font-size:16px;}
+  .testbtns button{background:var(--orange); font-size:16px; font-weight:bold; width:52px; height:44px;}
+  #log{background:var(--black); color:#8f8; font-family:Consolas,monospace; font-size:11px; height:110px; overflow-y:auto; border-radius:8px; padding:8px;}
+  #log .out{color:#fc6;}
+  #gameframe{width:100%; height:560px; border:3px solid var(--black); border-radius:12px; background:#fff;}
+  .flash{animation:flash .4s;}
+  @keyframes flash{0%{box-shadow:0 0 0 6px var(--orange);}100%{box-shadow:none;}}
+  details{margin-top:8px;}
+  summary{cursor:pointer; font-size:13px; color:var(--gray);}
+  .hint{font-size:12px; color:var(--gray); line-height:1.5;}
+  code{background:#f3f0e8; padding:1px 5px; border-radius:4px; font-size:12px;}
+</style>
+</head>
+<body>
+<h1>實體訊號橋接控制台 <span style="color:var(--orange)">WIRELESS BRIDGE</span></h1>
+<div class="sub">WEMOS 感測器的無線訊號 → 網頁遊戲的動作｜黑客松・共創跨代童玩</div>
+
+<div class="wrap">
+<div><!-- 左欄 -->
+
+  <div class="card">
+    <h2><span class="stepnum">1</span>連線 <span class="statusdot" id="dot"></span><span id="statustext" style="font-size:12px;color:var(--gray)">未連線</span></h2>
+    <div class="row">
+      <span>我是</span>
+      <select id="group">
+        <option value="g1">第1組 陀螺隊</option>
+        <option value="g2">第2組 彈珠隊</option>
+        <option value="g3">第3組 紙飛機隊</option>
+        <option value="g4">第4組 竹蜻蜓隊</option>
+        <option value="g5">第5組 毽子隊</option>
+        <option value="g6">第6組 尪仔標隊</option>
+      </select>
+      <button class="primary" id="btnConnect">📡 連線</button>
+      <button id="btnDisconnect" disabled>中斷</button>
+    </div>
+    <div class="hint">選好組別按「連線」就好。你組的 WEMOS 送出的訊號會自動出現在下面的紀錄裡。</div>
+    <details>
+      <summary>🛠 給老師：連線設定</summary>
+      <div class="row" style="margin-top:6px">
+        <input type="text" id="broker" value="wss://broker.emqx.io:8084/mqtt" style="width:100%" title="MQTT broker（WebSocket）">
+      </div>
+      <div class="row">
+        <input type="text" id="prefix" value="ckfablab/toy2026" style="width:100%" title="Topic 前綴">
+      </div>
+      <div class="row">
+        <input type="text" id="mqUser" value="CKfablab" style="width:48%" title="MQTT 帳號" placeholder="帳號">
+        <input type="text" id="mqPass" value="@USR3413" style="width:48%" title="MQTT 密碼" placeholder="密碼">
+      </div>
+      <div class="hint">訂閱主題：<code id="topicShow">ckfablab/toy2026/g1/signal</code>，訊息內容為 <code>A</code>／<code>B</code>／<code>C</code>／<code>D</code>。帳密與主題需與 Arduino 範本一致。</div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2><span class="stepnum">2</span>有幾個實體訊號？</h2>
+    <div class="row">
+      <select id="numInputs">
+        <option value="1">1 個</option>
+        <option value="2" selected>2 個</option>
+        <option value="3">3 個</option>
+        <option value="4">4 個</option>
+      </select>
+      <span class="hint">例：按鈕＋光敏 ＝ 2 個</span>
+    </div>
+    <div class="row testbtns" id="testbtns"></div>
+    <div class="hint">橘色按鈕＝手動測試訊號（WEMOS 還沒好也能先試規則）</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="stepnum">3</span>設定規則：當…就…</h2>
+    <div id="rules"></div>
+  </div>
+
+  <div class="card">
+    <h2>📟 訊號紀錄</h2>
+    <div id="log"></div>
+  </div>
+
+</div>
+<div><!-- 右欄 -->
+
+  <div class="card">
+    <h2><span class="stepnum">4</span>貼上你的 HTML 遊戲</h2>
+    <textarea id="htmlInput" rows="6" placeholder="把中語系老師課堂做的 HTML 遊戲原始碼整段貼進來，按「載入遊戲」"></textarea>
+    <div class="row" style="margin-top:8px">
+      <button class="primary" id="btnLoad">▶ 載入遊戲</button>
+      <button class="small" id="btnDemo">試玩內建範例（接住彈珠）</button>
+    </div>
+  </div>
+
+  <iframe id="gameframe" title="遊戲畫面"></iframe>
+
+</div>
+</div>
+
+<script>
+"use strict";
+const SIGNALS = ['A','B','C','D'];
+const KEYS = [
+  ['Space','空白鍵 Space',' '],
+  ['ArrowLeft','← 左方向鍵','ArrowLeft'],
+  ['ArrowRight','→ 右方向鍵','ArrowRight'],
+  ['ArrowUp','↑ 上方向鍵','ArrowUp'],
+  ['ArrowDown','↓ 下方向鍵','ArrowDown'],
+  ['KeyA','字母 A','a'],['KeyB','字母 B','b'],['KeyS','字母 S','s'],['KeyD','字母 D','d'],
+  ['Enter','Enter 鍵','Enter'],
+];
+
+const $ = id => document.getElementById(id);
+const logEl = $('log');
+function log(msg, out=false){
+  const d = document.createElement('div');
+  if(out) d.className = 'out';
+  d.textContent = `[${new Date().toLocaleTimeString('zh-TW',{hour12:false})}] ${msg}`;
+  logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight;
+}
+
+/* ── 規則列與測試按鈕 ── */
+function buildRows(){
+  const n = +$('numInputs').value;
+  const rules = $('rules'); rules.innerHTML = '';
+  const tests = $('testbtns'); tests.innerHTML = '';
+  for(let i=0;i<n;i++){
+    const s = SIGNALS[i];
+    const div = document.createElement('div');
+    div.className = 'rule'; div.id = 'rule'+s;
+    div.innerHTML = `
+      <div class="row" style="margin-bottom:6px">當 <span class="sig">${s}</span> 有訊號 → 就</div>
+      <div class="row">
+        <select id="act${s}" onchange="paramUI('${s}')">
+          <option value="key">模擬按下鍵盤</option>
+          <option value="click">點擊網頁上的按鈕</option>
+          <option value="call">呼叫遊戲裡的函式</option>
+        </select>
+        <span id="param${s}"></span>
+      </div>`;
+    rules.appendChild(div);
+    paramUI(s);
+    const tb = document.createElement('button');
+    tb.textContent = s;
+    tb.onclick = () => handleSignal(s, true);
+    tests.appendChild(tb);
+  }
+}
+function paramUI(s){
+  const mode = $('act'+s).value;
+  const span = $('param'+s);
+  if(mode==='key'){
+    span.innerHTML = `<select id="key${s}">` + KEYS.map(k=>`<option value="${k[0]}">${k[1]}</option>`).join('') + `</select>`;
+    if(s==='B') $('key'+s).value = 'ArrowRight';
+  }else if(mode==='click'){
+    span.innerHTML = `<input type="text" id="sel${s}" placeholder="按鈕文字或 #id，例：#jumpBtn" style="width:170px">`;
+  }else{
+    span.innerHTML = `<input type="text" id="fn${s}" placeholder="函式名，例：addScore" style="width:170px">`;
+  }
+}
+
+/* ── 訊號 → 動作 ── */
+function handleSignal(s, isTest=false){
+  log(`收到訊號 ${s}${isTest?'（測試）':''}`);
+  const rule = $('rule'+s); if(!rule) return;
+  rule.classList.remove('flash'); void rule.offsetWidth; rule.classList.add('flash');
+  const frame = $('gameframe');
+  const win = frame.contentWindow, doc = frame.contentDocument;
+  if(!win || !doc){ log('⚠ 還沒載入遊戲'); return; }
+  const mode = $('act'+s).value;
+  try{
+    if(mode==='key'){
+      const code = $('key'+s).value;
+      const k = KEYS.find(x=>x[0]===code);
+      const opts = {key:k[2], code:k[0], keyCode:keyCodeOf(k[0]), which:keyCodeOf(k[0]), bubbles:true, cancelable:true};
+      const targets = [doc, doc.body, win].filter(Boolean);
+      targets.forEach(t=>{ t.dispatchEvent(new KeyboardEvent('keydown', opts)); });
+      setTimeout(()=>targets.forEach(t=>t.dispatchEvent(new KeyboardEvent('keyup', opts))), 80);
+      log(`→ 模擬按鍵 ${k[1]}`, true);
+    }else if(mode==='click'){
+      const q = ($('sel'+s).value||'').trim();
+      if(!q){ log('⚠ 請先填按鈕文字或 #id'); return; }
+      let el = null;
+      try{ el = doc.querySelector(q); }catch(e){}
+      if(!el){ el = [...doc.querySelectorAll('button,a,[onclick]')].find(b=>b.textContent.includes(q)); }
+      if(el){ el.click(); log(`→ 點擊「${q}」`, true); }
+      else log(`⚠ 找不到「${q}」`);
+    }else{
+      const fn = ($('fn'+s).value||'').trim();
+      if(fn && typeof win[fn]==='function'){ win[fn](); log(`→ 呼叫 ${fn}()`, true); }
+      else log(`⚠ 遊戲裡沒有函式 ${fn}`);
+    }
+    win.postMessage({type:'bridge-signal', signal:s}, '*'); // 進階：遊戲也可自行監聽
+  }catch(err){ log('⚠ 觸發失敗：'+err.message); }
+}
+function keyCodeOf(code){
+  const m = {Space:32,ArrowLeft:37,ArrowUp:38,ArrowRight:39,ArrowDown:40,Enter:13,
+             KeyA:65,KeyB:66,KeyS:83,KeyD:68};
+  return m[code]||0;
+}
+
+/* ── MQTT 連線 ── */
+let client = null;
+function topic(){ return `${$('prefix').value.trim().replace(/\/$/,'')}/${$('group').value}/signal`; }
+function updateTopicShow(){ $('topicShow').textContent = topic(); }
+function connect(){
+  const url = $('broker').value.trim();
+  const t = topic();
+  try{
+    client = mqtt.connect(url, {
+      clientId:'bridge_'+$('group').value+'_'+Math.random().toString(16).slice(2,8),
+      username: $('mqUser').value.trim(),
+      password: $('mqPass').value,
+      keepalive:30, reconnectPeriod:3000});
+  }catch(e){ log('⚠ 連線失敗：'+e.message); return; }
+  $('btnConnect').disabled = true;
+  log('連線中… '+url);
+  client.on('connect', ()=>{
+    client.subscribe(t, err=>{
+      if(err){ log('⚠ 訂閱失敗：'+err.message); return; }
+      $('dot').classList.add('on'); $('statustext').textContent='已連線';
+      $('btnDisconnect').disabled = false;
+      log('✔ 已連線，監聽 '+t);
+    });
+  });
+  client.on('message', (tp, payload)=>{
+    const line = payload.toString().trim().toUpperCase();
+    const s = SIGNALS.includes(line) ? line : SIGNALS[+line-1];
+    if(s) handleSignal(s);
+    else log('（未知訊號：'+line+'）');
+  });
+  client.on('reconnect', ()=>{ $('statustext').textContent='重連中…'; });
+  client.on('error', e=>{ log('⚠ '+e.message); });
+  client.on('close', ()=>{ $('dot').classList.remove('on'); });
+}
+function disconnect(){
+  if(client){ client.end(true); client = null; }
+  $('dot').classList.remove('on'); $('statustext').textContent='未連線';
+  $('btnConnect').disabled = false; $('btnDisconnect').disabled = true;
+  log('已中斷連線');
+}
+
+/* ── 載入遊戲 ── */
+function loadGame(html){
+  $('gameframe').srcdoc = html;
+  log('✔ 遊戲已載入');
+}
+
+/* ── 內建範例：接住彈珠 ── */
+const DEMO = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+body{margin:0;background:#1A1A1A;font-family:"Microsoft JhengHei",sans-serif;overflow:hidden}
+#score{color:#F4ECDD;font-size:28px;text-align:center;padding:8px}
+#hint{color:#9A9186;font-size:13px;text-align:center}
+canvas{display:block;margin:8px auto;background:#F4ECDD;border-radius:10px}
+</style></head><body>
+<div id="score">分數：0</div><div id="hint">← → 移動盤子接彈珠（可用實體訊號觸發！）</div>
+<canvas id="c" width="520" height="400"></canvas>
+<script>
+const cv=document.getElementById('c'),cx=cv.getContext('2d');
+let px=210,score=0,balls=[];
+function spawn(){balls.push({x:30+Math.random()*460,y:-10,v:2+Math.random()*2});}
+setInterval(spawn,1400);
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft')px=Math.max(0,px-46);
+  if(e.key==='ArrowRight')px=Math.min(420,px+46);
+});
+function addScore(){score+=5;document.getElementById('score').textContent='分數：'+score;}
+window.addScore=addScore;
+function tick(){
+  cx.clearRect(0,0,520,400);
+  cx.fillStyle='#D94F2B';
+  balls.forEach(b=>{b.y+=b.v;cx.beginPath();cx.arc(b.x,b.y,11,0,7);cx.fill();});
+  balls=balls.filter(b=>{
+    if(b.y>368&&b.x>px&&b.x<px+100){score++;document.getElementById('score').textContent='分數：'+score;return false;}
+    return b.y<410;
+  });
+  cx.fillStyle='#1A1A1A';cx.fillRect(px,380,100,14);
+  requestAnimationFrame(tick);
+}tick();
+<\/script></body></html>`;
+
+/* ── 綁定 ── */
+$('btnConnect').onclick = connect;
+$('btnDisconnect').onclick = disconnect;
+$('numInputs').onchange = buildRows;
+$('group').onchange = ()=>{ updateTopicShow(); if(client){ disconnect(); connect(); } };
+$('prefix').oninput = updateTopicShow;
+$('btnLoad').onclick = () => { const h=$('htmlInput').value.trim(); if(h) loadGame(h); else alert('請先貼上 HTML'); };
+$('btnDemo').onclick = () => { loadGame(DEMO); log('提示：把 A 設「← 左」、B 設「→ 右」，按測試按鈕就能玩'); };
+buildRows();
+updateTopicShow();
+log('歡迎！選組別 → 連線 → 設規則 → 貼遊戲，四步完成。');
+</script>
+</body>
+</html>
