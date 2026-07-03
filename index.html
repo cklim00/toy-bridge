@@ -107,6 +107,7 @@
     <div class="row" style="margin-top:8px">
       <button class="primary" id="btnLoad">▶ 載入遊戲</button>
       <button class="small" id="btnDemo">試玩內建範例（接住彈珠）</button>
+      <button class="small" id="btnFull" style="margin-left:auto">⛶ 遊戲全螢幕（Esc 退出）</button>
     </div>
   </div>
 
@@ -308,6 +309,12 @@ $('group').onchange = ()=>{ updateTopicShow(); if(client){ disconnect(); connect
 $('prefix').oninput = updateTopicShow;
 $('btnLoad').onclick = () => { const h=$('htmlInput').value.trim(); if(h) loadGame(h); else alert('請先貼上 HTML'); };
 $('btnDemo').onclick = () => { loadGame(DEMO); log('提示：把 A 設「← 左」、B 設「→ 右」，按測試按鈕就能玩'); };
+$('btnFull').onclick = () => {
+  const f = $('gameframe');
+  if (document.fullscreenElement) document.exitFullscreen();
+  else if (f.requestFullscreen) f.requestFullscreen();
+  else if (f.webkitRequestFullscreen) f.webkitRequestFullscreen();
+};
 buildRows();
 updateTopicShow();
 log('歡迎！選組別 → 連線 → 設規則 → 貼遊戲，四步完成。');
