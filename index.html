@@ -66,10 +66,10 @@
         <input type="text" id="prefix" value="ckfablab/toy2026" style="width:100%" title="Topic 前綴">
       </div>
       <div class="row">
-        <input type="text" id="mqUser" value="CKfablab" style="width:48%" title="MQTT 帳號" placeholder="帳號">
-        <input type="text" id="mqPass" value="@USR3413" style="width:48%" title="MQTT 密碼" placeholder="密碼">
+        <input type="text" id="mqUser" value="" style="width:48%" title="MQTT 帳號" placeholder="帳號（空白＝用預設）">
+        <input type="text" id="mqPass" value="" style="width:48%" title="MQTT 密碼" placeholder="密碼（空白＝用預設）">
       </div>
-      <div class="hint">訂閱主題：<code id="topicShow">ckfablab/toy2026/g1/signal</code>，訊息內容為 <code>A</code>／<code>B</code>／<code>C</code>／<code>D</code>。帳密與主題需與 Arduino 範本一致。</div>
+      <div class="hint">訂閱主題：<code id="topicShow">ckfablab/toy2026/g1/signal</code>，訊息內容為 <code>A</code>／<code>B</code>／<code>C</code>／<code>D</code>。帳密空白時自動使用老師預設帳號；預設連不上時才需自行填入。</div>
     </details>
   </div>
 
@@ -218,6 +218,8 @@ function keyCodeOf(code){
 }
 
 /* ── MQTT 連線 ── */
+const DEFAULT_MQTT_USER = 'CKfablab';   // 預設帳密：欄位空白時自動採用
+const DEFAULT_MQTT_PASS = '@USR3413';
 let client = null;
 function topic(){ return `${$('prefix').value.trim().replace(/\/$/,'')}/${$('group').value}/signal`; }
 function updateTopicShow(){ $('topicShow').textContent = topic(); }
@@ -227,8 +229,8 @@ function connect(){
   try{
     client = mqtt.connect(url, {
       clientId:'bridge_'+$('group').value+'_'+Math.random().toString(16).slice(2,8),
-      username: $('mqUser').value.trim(),
-      password: $('mqPass').value,
+      username: $('mqUser').value.trim() || DEFAULT_MQTT_USER,   // 空白＝預設，填了＝用填的
+      password: $('mqPass').value || DEFAULT_MQTT_PASS,
       keepalive:30, reconnectPeriod:3000});
   }catch(e){ log('⚠ 連線失敗：'+e.message); return; }
   $('btnConnect').disabled = true;
@@ -312,4 +314,3 @@ log('歡迎！選組別 → 連線 → 設規則 → 貼遊戲，四步完成。
 </script>
 </body>
 </html>
-                                                                                                                                                                                                                                                                    
